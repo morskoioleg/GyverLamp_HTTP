@@ -2,16 +2,9 @@ uint32_t effTimer;
 
 void effectsTick() {
   if (!dawnFlag) {
-    Serial.println('OnFlag');
-    Serial.println(ONflag);    
-    Serial.println('millis');
-    Serial.println(millis());    
-    Serial.println('effTimer');
-    Serial.println(effTimer);        
     if (ONflag && millis() - effTimer >= ((currentMode < 5 || currentMode > 13) ? modes[currentMode].speed : 50) ) {
       effTimer = millis();
       switch (currentMode) {
-        Serial.println(currentMode);
         case 0: sparklesRoutine();
           break;
         case 1: fireRoutine();
@@ -47,8 +40,6 @@ void effectsTick() {
         case 16: matrixRoutine();
           break;
         case 17: lightersRoutine();
-          break;
-        case 18: fillString(WiFi.localIP().toString(), CRGB::White);       // каждая буква случайным цветом!
           break;
       }
       FastLED.show();

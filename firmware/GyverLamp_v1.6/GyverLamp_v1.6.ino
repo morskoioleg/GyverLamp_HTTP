@@ -8,15 +8,19 @@
 */
 
 /*
-  Версия 1.4:
-  - Исправлен баг при смене режимов
-  - Исправлены тормоза в режиме точки доступа
+  Версия 1.6:
+  TODO
 */
 
 // Ссылка для менеджера плат:
 // http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
+// Для WEMOS выбираем плату LOLIN(WEMOS) D1 R2 & mini		
+// Для NodeMCU выбираем NodeMCU 1.0 (ESP-12E Module)
+
 // ============= НАСТРОЙКИ =============
+// -------- КНОПКА -------		
+#define USE_BUTTON 1    // 1 - использовать кнопку, 0 - нет
 // -------- ВРЕМЯ -------
 #define GMT 3              // смещение (москва 3)
 #define NTP_ADDRESS  "europe.pool.ntp.org"    // сервер времени
@@ -45,7 +49,6 @@
 // 0 - точка доступа
 // 1 - локальный
 byte IP_AP[] = {192, 168, 4, 66};   // статический IP точки доступа (менять только последнюю цифру)
-byte IP_STA[] = {192, 168, 1, 66};  // статический IP локальный (менять только последнюю цифру)
 
 // ----- AP (точка доступа) -------
 #define AP_SSID "GyverLamp"
@@ -69,7 +72,7 @@ byte IP_STA[] = {192, 168, 1, 66};  // статический IP локальн�
 #define FASTLED_ESP8266_RAW_PIN_ORDER
 #define NTP_INTERVAL 60 * 1000    // обновление (1 минута)
 
-#include "timerMinim.h"
+#include "timer2Minim.h"
 #include <FastLED.h>
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
@@ -93,7 +96,7 @@ WiFiServer server(80);
 WiFiUDP Udp;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_ADDRESS, GMT * 3600, NTP_INTERVAL);
-timerMinim timeTimer(3000);
+timerMinim timeTimer(1000);
 GButton touch(BTN_PIN, LOW_PULL, NORM_OPEN);
 
 // ----------------- ПЕРЕМЕННЫЕ ------------------
@@ -131,13 +134,17 @@ boolean settChanged = false;
 // Безумие 3D, Облака 3D, Лава 3D, Плазма 3D, Радуга 3D,
 // Павлин 3D, Зебра 3D, Лес 3D, Океан 3D,
 
+//ПОД ВОПРОСОМ НАДО ЛИ ЭТО
 //TEXT
 byte modeCode;    // 0 бегущая, 1 часы, 2 игры, 3 нойс маднесс и далее, 21 гифка или картинка,
 boolean fullTextFlag = false;
 #define D_TEXT_SPEED 500      // скорость бегущего текста по умолчанию (мс)
 timerMinim scrollTimer(D_TEXT_SPEED);
-
+//END ПОД ВОПРОСОМ НАДО ЛИ ЭТО
 unsigned char matrixValue[8][16];
+String lampIP = "";		
+byte hrs, mins, secs;		
+byte days;
 
 void setup() {
   ESP.wdtDisable();
@@ -155,6 +162,7 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println();
+  delay(1000);
 
   // WI-FI
   if (ESP_MODE == 0) {    // режим точки доступа
@@ -173,21 +181,21 @@ void setup() {
     Serial.print("WiFi manager");
     WiFiManager wifiManager;
     //wifiManager.setDebugOutput(false);
-    //wifiManager.resetSettings();
+    
+#if (USE_BUTTON == 1)		
+    if (digitalRead(BTN_PIN)) wifiManager.resetSettings();		
+#endif
 
     wifiManager.autoConnect(autoConnectSSID, autoConnectPass);
-   // WiFi.config(IPAddress(IP_STA[0], IP_STA[1], IP_STA[2], IP_STA[3]),
-     //           IPAddress(192, 168, 1, 1),
-       //         IPAddress(255, 255, 255, 0));
     Serial.print("Connected! IP address: ");
     Serial.println(WiFi.localIP());
+    lampIP = WiFi.localIP().toString();
   }
   Serial.printf("UDP server on port %d\n", localPort);
   Udp.begin(localPort);
 
   if (mdns.begin("esp8266", WiFi.localIP())) {
     Serial.println("MDNS responder started");
-               //  "Запущен MDNSresponder"
   }
 
 
@@ -201,7 +209,7 @@ void setup() {
 
   httpServer.begin();
 
-  scrollTimer.setInterval(D_TEXT_SPEED);
+  scrollTimer.setInterval(D_TEXT_SPEED); //ПОД ВОПРОСОМ НАДО ЛИ ЭТО
   
   // EEPROM
   EEPROM.begin(202);
@@ -238,17 +246,27 @@ void setup() {
   char reply[inputBuffer.length() + 1];
   inputBuffer.toCharArray(reply, inputBuffer.length() + 1);
   Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-  Serial.println(Udp.remoteIP());
-  Serial.println(Udp.remotePort());
   Udp.write(reply);
   Udp.endPacket();
-  
   timeClient.begin();
   memset(matrixValue, 0, sizeof(matrixValue));
 
   randomSeed(micros());
+  
+  // получаем время
+  byte count = 0;
+  while (count < 5) {
+    if (timeClient.update()) {
+      hrs = timeClient.getHours();
+      mins = timeClient.getMinutes();
+      secs = timeClient.getSeconds();
+      days = timeClient.getDay();
+      break;
+    }
+    count++;
+    delay(500);
+  } 
 }
-
 
 void handleSpecificArg() { 
   String message = "";
@@ -261,13 +279,12 @@ void handleSpecificArg() {
     message += inputBuffer;     //Gets the value of the query parameter
   }
 
-
-    //inputBuffer = packetBuffer;
-Serial.println("inputBuffer:");
-Serial.println(inputBuffer);
-    if (inputBuffer.startsWith("DEB")) {
+    Serial.println("inputBuffer:");
+    Serial.println(inputBuffer);
+     //TODO: CHange to switch
+    if (inputBuffer.startsWith("DEB")) {  //not tested
       inputBuffer = "OK " + timeClient.getFormattedTime();
-    } else if (inputBuffer.startsWith("GET")) {
+    } else if (inputBuffer.startsWith("GET")) {//not used
       message = "CURR";
       message += " ";
       message += String(currentMode);
@@ -301,13 +318,13 @@ Serial.println(inputBuffer);
       sendCurrent();
       FastLED.setBrightness(modes[currentMode].brightness);
     } else if (inputBuffer.startsWith("BRI")) {
-Serial.println( inputBuffer.substring(3).toInt());      
+    Serial.println( inputBuffer.substring(3).toInt());      
       modes[currentMode].brightness = inputBuffer.substring(3).toInt();
       FastLED.setBrightness(modes[currentMode].brightness);
       settChanged = true;
       eepromTimer = millis();
     } else if (inputBuffer.startsWith("SPD")) {
-Serial.println( inputBuffer.substring(3).toInt());      
+    Serial.println( inputBuffer.substring(3).toInt());      
       modes[currentMode].speed = inputBuffer.substring(3).toInt();
       loadingFlag = true;
       settChanged = true;
@@ -325,7 +342,11 @@ Serial.println( inputBuffer.substring(3).toInt());
       ONflag = false;
       changePower();
       sendCurrent();
-    } else if (inputBuffer.startsWith("ALM_SET")) {
+    } else if (inputBuffer.startsWith("P_SWITCH")) {//not tested
+      ONflag = !ONflag;
+      changePower();
+      sendCurrent();      
+    } else if (inputBuffer.startsWith("ALM_SET")) { //not tested
       byte alarmNum = (char)inputBuffer[7] - '0';
       alarmNum -= 1;
       if (inputBuffer.indexOf("ON") != -1) {
@@ -344,9 +365,9 @@ Serial.println( inputBuffer.substring(3).toInt());
                       ":" + String(minute);
       }
       saveAlarm(alarmNum);
-    } else if (inputBuffer.startsWith("ALM_GET")) {
+    } else if (inputBuffer.startsWith("ALM_GET")) {  //TODO: not tested
       sendAlarms();
-    } else if (inputBuffer.startsWith("DAWN")) {
+    } else if (inputBuffer.startsWith("DAWN")) {  //TODO: not tested
       dawnMode = inputBuffer.substring(4).toInt() - 1;
       saveDawnMmode();
     }
@@ -362,10 +383,11 @@ void loop() {
   effectsTick();
   eepromTick();
   timeTick();
+#if (USE_BUTTON == 1)  
   buttonTick();
-  //    fillString("Ваш текст", 2);       // каждая буква случайным цветом!
+#endif
   ESP.wdtFeed();   // пнуть собаку
-  yield();
+  yield();  // ещё раз пнуть собаку
 }
 
 void eeWriteInt(int pos, int val) {

@@ -5,54 +5,49 @@
 #define MIRR_V 0          // отразить текст по вертикали (0 / 1)
 #define MIRR_H 0          // отразить текст по горизонтали (0 / 1)
 
-#define TEXT_HEIGHT 5     // высота, на которой бежит текст (от низа матрицы)
+#define TEXT_HEIGHT 0     // высота, на которой бежит текст (от низа матрицы)
 #define LET_WIDTH 5       // ширина буквы шрифта
-#define LET_HEIGHT 9      // высота буквы шрифта
+#define LET_HEIGHT 8      // высота буквы шрифта
 #define SPACE 1           // пробел
 
 // --------------------- ДЛЯ РАЗРАБОТЧИКОВ ----------------------
 
-
-
 int offset = WIDTH;
+uint32_t scrollTimer;
 
-void fillString(String text, uint32_t color) {
- // if (loadingFlag) {
- //   offset = WIDTH;   // перемотка в правый край
- //   loadingFlag = false;    
- //   modeCode = 0;
- //   fullTextFlag = false;
- // }
-  
-  if (scrollTimer.isReady()) {
-    FastLED.clear();
-    byte i = 0, j = 0;
-    while (text[i] != '\0') {
-      if ((byte)text[i] > 191) {    // работаем с русскими буквами!
-        i++;
-      } else {
-        drawLetter(j, text[i], offset + j * (LET_WIDTH + SPACE), color);
-        i++;
-        j++;
-      }
-    }
-    fullTextFlag = false;
-
-    offset--;
-    if (offset < -j * (LET_WIDTH + SPACE)) {    // строка убежала
-      offset = WIDTH + 3;
-      fullTextFlag = true;
-    }
-    FastLED.show();
+boolean fillString(String text) {
+  if (loadingFlag) {
+    offset = WIDTH;   // перемотка в правый край
+    loadingFlag = false;
   }
+
+  if (millis() - scrollTimer >= 100) {
+    scrollTimer = millis();
+      FastLED.clear();
+      byte i = 0, j = 0;
+      while (text[i] != '\0') {
+        if ((byte)text[i] > 191) {    // работаем с русскими буквами!
+          i++;
+        } else {
+          drawLetter(j, text[i], offset + j * (LET_WIDTH + SPACE));
+          i++;
+          j++;
+        }
+      }
+
+      offset--;
+      if (offset < -j * (LET_WIDTH + SPACE)) {    // строка убежала
+        offset = WIDTH + 3;
+        return true;
+      }
+      FastLED.show();    
+  }
+  return false;
 }
 
-void drawLetter(uint8_t index, uint8_t letter, int16_t offset, uint32_t color) {
+void drawLetter(uint8_t index, uint8_t letter, int16_t offset) {
   int8_t start_pos = 0, finish_pos = LET_WIDTH;
-  CRGB letterColor;
-  if (color == 1) letterColor = CHSV(byte(offset * 10), 255, 255);
-  else if (color == 2) letterColor = CHSV(byte(index * 30), 255, 255);
-  else letterColor = color;
+  CRGB letterColor = CRGB::White;
 
   if (offset < -LET_WIDTH || offset > WIDTH) return;
   if (offset < 0) start_pos = -offset;
@@ -77,7 +72,6 @@ void drawLetter(uint8_t index, uint8_t letter, int16_t offset, uint32_t color) {
         if (thisBit) leds[getPixelNumber(i, offset + TEXT_HEIGHT + j)] = letterColor;
         else drawPixelXY(i, offset + TEXT_HEIGHT + j, 0x000000);
       }
-
     }
   }
 }
@@ -94,20 +88,3 @@ uint8_t getFont(uint8_t font, uint8_t row) {
     return pgm_read_byte(&(fontHEX[font + 47][row]));
   }
 }
-
-//#elif (USE_FONTS == 0)
-//void fillString(String text, uint32_t color) {
-//  fullTextFlag = false;
-//  modeCode = 0;
-//  return;
-//}
-
-
-/*
-  // интерпретатор кода символа по ASCII в его номер в массиве fontHEX (для Arduino IDE до 1.6.*)
-  uint8_t getFontOld(uint8_t font, uint8_t row) {
-  font = font - '0' + 16;   // перевод код символа из таблицы ASCII в номер согласно нумерации массива
-  if (font < 126) return pgm_read_byte(&(fontHEX[font][row]));   // для английских букв и символов
-  else return pgm_read_byte(&(fontHEX[font - 65][row]));         // для русских букв и символов (смещение -65 по массиву)
-  }
-*/
