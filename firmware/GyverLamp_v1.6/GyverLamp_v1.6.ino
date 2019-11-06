@@ -207,8 +207,6 @@ void setup() {
 
   httpServer.begin();
 
-//  scrollTimer.setInterval(D_TEXT_SPEED); //ПОД ВОПРОСОМ НАДО ЛИ ЭТО
-  
   // EEPROM
   EEPROM.begin(202);
   delay(50);
@@ -325,30 +323,47 @@ void handleSpecificArg() {
     } else if (inputBuffer.startsWith("P_OFF")) {
       ONflag = false;
       changePower();
-    } else if (inputBuffer.startsWith("P_SWITCH")) {//not tested
+    } else if (inputBuffer.startsWith("P_SWITCH")) {
       ONflag = !ONflag;
       changePower();
     } else if (inputBuffer.startsWith("ALM_SET")) { //not tested
       byte alarmNum = (char)inputBuffer[7] - '0';
+      //byte alarmNum = (byte)inputBuffer.substring(7).toInt();
       alarmNum -= 1;
+      Serial.println(inputBuffer);
+      Serial.println(inputBuffer.substring(5));
+      Serial.println(inputBuffer.substring(6));
+      Serial.println(inputBuffer.substring(7));
+      Serial.println(inputBuffer.substring(8));
+      Serial.println(inputBuffer.substring(9));
+      Serial.println(inputBuffer.substring(10));
       if (inputBuffer.indexOf("ON") != -1) {
         alarm[alarmNum].state = true;
-        inputBuffer = "alm #" + String(alarmNum + 1) + " ON";
+        message = "alm #" + String(alarmNum + 1) + " ON";
       } else if (inputBuffer.indexOf("OFF") != -1) {
         alarm[alarmNum].state = false;
-        inputBuffer = "alm #" + String(alarmNum + 1) + " OFF";
+        message = "alm #" + String(alarmNum + 1) + " OFF";
       } else {
         int almTime = inputBuffer.substring(8).toInt();
         alarm[alarmNum].time = almTime;
         byte hour = floor(almTime / 60);
         byte minute = almTime - hour * 60;
-        inputBuffer = "alm #" + String(alarmNum + 1) +
+        message = "alm #" + String(alarmNum + 1) +
                       " " + String(hour) +
                       ":" + String(minute);
       }
       saveAlarm(alarmNum);
     } else if (inputBuffer.startsWith("ALM_GET")) {  //TODO: not tested
-      sendAlarms();
+        message = "ALMS ";
+        for (byte i = 0; i < 7; i++) {
+          message += String(alarm[i].state);
+          message += " ";
+        }
+        for (byte i = 0; i < 7; i++) {
+          message += String(alarm[i].time);
+          message += " ";
+        }
+        message += (dawnMode + 1);
     } else if (inputBuffer.startsWith("DAWN")) {  //TODO: not tested
       dawnMode = inputBuffer.substring(4).toInt() - 1;
       saveDawnMmode();

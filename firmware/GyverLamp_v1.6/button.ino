@@ -39,11 +39,14 @@ void buttonTick() {
     delay(1);
   }
 
-  // вывод IP на лампу
+  
   if (ONflag && touch.hasClicks()) {
-    if (touch.getClicks() == 5) {
+    if (touch.getClicks() == 5) {// вывод IP на лампу
       while(!fillString(lampIP)) delay(1);
     }
+    if (touch.getClicks() == 4) {// вывод времени на лампу
+      while(!fillString(timeClient.getFormattedTime())) delay(1);
+    }    
   }  
 
   if (ONflag && touch.isHolded()) {
