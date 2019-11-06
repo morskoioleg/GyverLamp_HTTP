@@ -1,6 +1,6 @@
 boolean brightDirection;
 
-void buttonTick() {  
+void buttonTick() {
   touch.tick();
   if (touch.isSingle()) {
     if (dawnFlag) {
@@ -30,7 +30,7 @@ void buttonTick() {
     delay(1);
   }
   if (ONflag && touch.isTriple()) {
-    if (--currentMode < 0) currentMode = MODE_AMOUNT;
+    if (--currentMode < 0) currentMode = 0;
     FastLED.setBrightness(modes[currentMode].brightness);
     loadingFlag = true;
     settChanged = true;
@@ -38,13 +38,6 @@ void buttonTick() {
     FastLED.clear();
     delay(1);
   }
-
-  // вывод IP на лампу
-  if (ONflag && touch.hasClicks()) {
-    if (touch.getClicks() == 5) {
-      while(!fillString(lampIP)) delay(1);
-    }
-  }  
 
   if (ONflag && touch.isHolded()) {
     brightDirection = !brightDirection;

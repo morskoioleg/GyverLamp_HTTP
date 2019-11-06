@@ -4,7 +4,8 @@ void parseUDP() {
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
     packetBuffer[n] = 0;
     inputBuffer = packetBuffer;
-
+Serial.println("inputBuffer:");
+Serial.println(inputBuffer);
     if (inputBuffer.startsWith("DEB")) {
       inputBuffer = "OK " + timeClient.getFormattedTime();
     } else if (inputBuffer.startsWith("GET")) {
