@@ -62,7 +62,7 @@ byte IP_AP[] = {192, 168, 4, 66};   // статический IP точки до
 // ============= ДЛЯ РАЗРАБОТЧИКОВ =============
 #define LED_PIN 2             // пин ленты
 #define BTN_PIN 4
-#define MODE_AMOUNT 19
+#define MODE_AMOUNT 18
 
 #define NUM_LEDS WIDTH * HEIGHT
 #define SEGMENTS 1            // диодов в одном "пикселе" (для создания матрицы из кусков ленты)
@@ -134,13 +134,6 @@ boolean settChanged = false;
 // Безумие 3D, Облака 3D, Лава 3D, Плазма 3D, Радуга 3D,
 // Павлин 3D, Зебра 3D, Лес 3D, Океан 3D,
 
-//ПОД ВОПРОСОМ НАДО ЛИ ЭТО
-//TEXT
-byte modeCode;    // 0 бегущая, 1 часы, 2 игры, 3 нойс маднесс и далее, 21 гифка или картинка,
-boolean fullTextFlag = false;
-#define D_TEXT_SPEED 500      // скорость бегущего текста по умолчанию (мс)
-timerMinim scrollTimer(D_TEXT_SPEED);
-//END ПОД ВОПРОСОМ НАДО ЛИ ЭТО
 unsigned char matrixValue[8][16];
 String lampIP = "";		
 byte hrs, mins, secs;		
@@ -180,10 +173,15 @@ void setup() {
   } else {                // подключаемся к роутеру
     Serial.print("WiFi manager");
     WiFiManager wifiManager;
-    //wifiManager.setDebugOutput(false);
+    wifiManager.setDebugOutput(false);
     
 #if (USE_BUTTON == 1)		
-    if (digitalRead(BTN_PIN)) wifiManager.resetSettings();		
+    if (digitalRead(BTN_PIN)){
+      Serial.print("Going to reset settings");
+      wifiManager.resetSettings();		
+    }
+    else
+    Serial.print("NOT Going to reset settings");
 #endif
 
     wifiManager.autoConnect(autoConnectSSID, autoConnectPass);
@@ -209,7 +207,7 @@ void setup() {
 
   httpServer.begin();
 
-  scrollTimer.setInterval(D_TEXT_SPEED); //ПОД ВОПРОСОМ НАДО ЛИ ЭТО
+//  scrollTimer.setInterval(D_TEXT_SPEED); //ПОД ВОПРОСОМ НАДО ЛИ ЭТО
   
   // EEPROM
   EEPROM.begin(202);
@@ -283,19 +281,7 @@ void handleSpecificArg() {
     Serial.println(inputBuffer);
      //TODO: CHange to switch
     if (inputBuffer.startsWith("DEB")) {  //not tested
-      inputBuffer = "OK " + timeClient.getFormattedTime();
-    } else if (inputBuffer.startsWith("GET")) {//not used
-      message = "CURR";
-      message += " ";
-      message += String(currentMode);
-      message += " ";
-      message += String(modes[currentMode].brightness);
-      message += " ";
-      message += String(modes[currentMode].speed);
-      message += " ";
-      message += String(modes[currentMode].scale);
-      message += " ";
-      message += String(ONflag);
+      message = "OK " + timeClient.getFormattedTime();
     } else if (inputBuffer.startsWith("STATUS")) { //{"status":{"mode":0,"brightness":4,"speed":75,"scale":5,"onFlag":1}}
       message = "toJsonContainer({\"status\":{\"mode\":";
       message += String(currentMode);
@@ -315,7 +301,6 @@ void handleSpecificArg() {
       loadingFlag = true;
       FastLED.clear();
       delay(1);
-      sendCurrent();
       FastLED.setBrightness(modes[currentMode].brightness);
     } else if (inputBuffer.startsWith("BRI")) {
     Serial.println( inputBuffer.substring(3).toInt());      
@@ -337,15 +322,12 @@ void handleSpecificArg() {
     } else if (inputBuffer.startsWith("P_ON")) {
       ONflag = true;
       changePower();
-      sendCurrent();
     } else if (inputBuffer.startsWith("P_OFF")) {
       ONflag = false;
       changePower();
-      sendCurrent();
     } else if (inputBuffer.startsWith("P_SWITCH")) {//not tested
       ONflag = !ONflag;
       changePower();
-      sendCurrent();      
     } else if (inputBuffer.startsWith("ALM_SET")) { //not tested
       byte alarmNum = (char)inputBuffer[7] - '0';
       alarmNum -= 1;
