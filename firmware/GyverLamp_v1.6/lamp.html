@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <link href="https://fonts.googleapis.com/css?family=Play&display=swap" rel="stylesheet">
+      <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+
+    <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />	  
+      <title>Lamp</title>
+      <style>
+         @font-face { 
+         font-family: 'Play', sans-serif;
+         }
+         h3,a{font-family: 'Play', sans-serif;}
+      </style>
+   </head>
+   <body>
+      <h1>LAMP</h1>
+		<div style="position: absolute;right: 10px;top: 10px;">
+		   <input id="js-on-off-toggle" type="checkbox" checked data-toggle="toggle" data-onstyle="success">
+		</div>
+      <div class="container-fluid">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+         <li class="nav-item">
+            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Эффекты</a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Будильник</a>
+         </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+            <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="Toolbar with button groups">
+               <div class="btn-group mr-1" role="group" aria-label="Button group with nested dropdown" style="width: 100%;">
+                  <button type="button" class="btn btn-lg btn-outline-secondary js-mode-prev">&lt;</button>
+                  <div class="btn-group" role="group" style="width: 100%;">
+                     <button style="width:200px" id="btnGroupDrop" type="button" class="btn btn-lg btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-mode="0" aria-haspopup="true" aria-expanded="false">Конфетти</button>
+                     <div class="dropdown-menu js-dropdown" aria-labelledby="btnGroupDrop1" x-placement="top-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, -51px, 0px);">
+                        <a class="dropdown-item js-mode-button" data-mode="0" href="#">Конфетти</a>
+                        <a class="dropdown-item js-mode-button" data-mode="1" href="#">Огонь</a>
+                        <a class="dropdown-item js-mode-button" data-mode="2" href="#">Радуга(верт)</a>
+                        <a class="dropdown-item js-mode-button" data-mode="3" href="#">Радуга(гор)</a>
+                        <a class="dropdown-item js-mode-button" data-mode="4" href="#">Смена цвета</a>
+                        <a class="dropdown-item js-mode-button" data-mode="5" href="#">Безумие</a>
+                        <a class="dropdown-item js-mode-button" data-mode="6" href="#">Облака</a>
+                        <a class="dropdown-item js-mode-button" data-mode="7" href="#">Лава</a>
+                        <a class="dropdown-item js-mode-button" data-mode="8" href="#">Плазма</a>
+                        <a class="dropdown-item js-mode-button" data-mode="9" href="#">Радуга</a>
+                        <a class="dropdown-item js-mode-button" data-mode="10" href="#">Павлин</a>
+                        <a class="dropdown-item js-mode-button" data-mode="11" href="#">Зебра</a>
+                        <a class="dropdown-item js-mode-button" data-mode="12" href="#">Лес</a>
+                        <a class="dropdown-item js-mode-button" data-mode="13" href="#">Океан</a>
+                        <a class="dropdown-item js-mode-button" data-mode="14" href="#">Цвет</a>
+                        <a class="dropdown-item js-mode-button" data-mode="15" href="#">Снег</a>
+                        <a class="dropdown-item js-mode-button" data-mode="16" href="#">Матрица</a>
+                        <a class="dropdown-item js-mode-button" data-mode="17" href="#">Светлячки</a>
+                        <!--<a class="dropdown-item js-mode-button" data-mode="18" href="#">Сервис</a>-->
+                     </div>
+                  </div>
+                  <button type="button" class="btn btn-lg btn-outline-secondary js-mode-next">&gt;</button>
+               </div>
+            </div>
+            <div style="margin-top: 1rem;">
+               <input type="range" orient="vertical"  class="custom-range" step="25" id="brightness" name="brightness" min="0" max="255" style="width: 100%;">
+               <label for="brightness">Яркость</label>
+            </div>
+            <div style="margin-top: 1rem;">
+               <input type="range" id="speed" class="custom-range" step="25" name="speed" min="0" max="255" style="width: 100%;">
+               <label for="speed">Скорость</label>
+            </div>
+            <div style="margin-top: 1rem;">
+               <input type="range" id="scale" class="custom-range" step="25" name="scale" min="0" max="100" style="width: 100%;">
+               <label for="scale">Масштаб</label>
+            </div>
+         </div>
+         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="card bg-light">
+                     <h3 class="card-title text-center">
+                        <div class="d-flex flex-wrap justify-content-center mt-2">
+                           <a><span class="badge hours">XX</span></a> :
+                           <a><span class="badge min">XX</span></a> :
+                           <a><span class="badge sec">XX</span></a>
+                        </div>
+                     </h3>
+                  </div>
+               </div>
+            </div>
+			<div class="row" style="margin-top: 1rem;">
+				<div class="col-md-12">
+					<table class="table table-striped">
+					  <thead>
+						<tr>
+						  <th scope="col">День</th>
+						  <th scope="col">Время</th>
+						  <th scope="col">Состояние</th>
+						</tr>
+					  </thead>
+					  <tbody>
+						<tr>
+						  <th scope="row">Понедельник</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-monday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>
+						<tr>
+						  <th scope="row">Вторник</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-tuesday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>
+						<tr>
+						  <th scope="row">Среда</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-wensday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>
+						<tr>
+						  <th scope="row">Четверг</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-thursday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>
+						<tr>
+						  <th scope="row">Пятница</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-friday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>
+						<tr>
+						  <th scope="row">Суббота</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-saturday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>
+						<tr>
+						  <th scope="row">Воскресенье</th>
+						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-on-off-sunday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						</tr>						
+
+					  </tbody>
+					</table>
+				</div>
+			</div>
+         </div>
+      </div>
+      <div id="output"></div>
+      <script src="http://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+	      <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
+      <script>
+         let scale_time = 0;
+         let brightness_time = 0;
+         let speed_time = 0;
+         $("#scale").on("input", function() {
+         	clearTimeout(scale_time);
+         	scale = this.value;
+         	scale_time = setTimeout(function() {
+         		sendCmdJQuery('SCA' + scale);
+         	}, 100);
+         });
+         $("#speed").on("input", function() {
+         	clearTimeout(speed_time);
+         	speed = this.value;
+         	speed_time = setTimeout(function() {
+         		sendCmdJQuery('SPD' + speed);
+         	}, 100);
+         });
+         $("#brightness").on("input", function() {
+         	clearTimeout(brightness_time);
+         	brightness = this.value;
+         	brightness_time = setTimeout(function() {
+         		sendCmdJQuery('BRI' + brightness);
+         	}, 100);
+         });
+         $('#js-on-off-toggle').change(function() {
+         	if ($(this).prop('checked')){
+         		sendCmdJQuery('P_ON');
+         	}
+         	else {
+         		sendCmdJQuery('P_OFF');
+         	}
+         	//setOn($(this).prop('checked'));
+         });
+         	$(".js-mode-next").on("click", function() {
+         	mode=$('#btnGroupDrop').data('mode')+1;
+         	if (mode>17)
+         		mode=0;
+         	$('.js-dropdown').find(`[data-mode='${mode}']`).click();
+         });		
+         	$(".js-mode-prev").on("click", function() {
+         	mode=$('#btnGroupDrop').data('mode')-1;
+         	if (mode<0)
+         		mode=17;
+         	$('.js-dropdown').find(`[data-mode='${mode}']`).click();
+         });										
+         	$(".js-mode-button").on("click", function() {
+         	sendCmdJQuery('EFF' + $(this).attr('data-mode'));
+         	setCurrentModeName($(this).text(),$(this).data('mode'));
+         	get_status(false);
+         });
+         
+         function setOn(lampEnabled) {
+         	if (lampEnabled)
+         		$('#js-on-off-toggle').bootstrapToggle('on');
+         	else
+         		$('#js-on-off-toggle').bootstrapToggle('off');
+         }
+         
+         function setCurrentModeName(name,mode) {
+         	$('#btnGroupDrop').text(name);
+         	$('#btnGroupDrop').data('mode',mode);
+         }
+         
+         function toJsonContainer(json) {
+         	setCurrentModeName($("a[data-mode=" + json.status.mode + "]").text());
+         	$("#brightness").val(json.status.brightness);
+         	$("#speed").val(json.status.speed);
+         	$("#scale").val(json.status.scale);
+         	setOn(json.status.onFlag);
+         }
+         
+         function sendCmdJQuery(command_string) {
+         	$.get('/specificArgs', {
+         		command: command_string
+         	});
+         }
+         
+         function get_status(setTimer) {
+         	$.ajax({
+         		type: "GET",
+         		url: "/specificArgs",
+         		data: "command=STATUS",
+         		dataType: "jsonp",
+         		jsonpCallback: "toJsonContainer",
+         		timeout: 5000,
+         		complete: function(response) {
+         			if (setTimer) setTimeout(function() {
+         				get_status(true);
+         			}, 5000);
+         		}
+         	});
+         }
+         $(function() {
+         	get_status(true);
+         });
+		 
+		$( ".js-timepicker" ).each(function( index ) {
+		  $(this).timepicker({
+			mode: '24hr'
+			});		 
+		});		 
+		 
+		 
+      </script>
+   </body>
+</html>
