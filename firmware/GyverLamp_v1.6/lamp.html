@@ -7,13 +7,10 @@
       <link href="https://fonts.googleapis.com/css?family=Play&display=swap" rel="stylesheet">
       <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 
-    <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />	  
+    
       <title>💡</title>
       <style>
-         @font-face { 
-         font-family: 'Play', sans-serif;
-         }
-         h3,a{font-family: 'Play', sans-serif;}
+         body{font-family: 'Play', sans-serif;}
       </style>
    </head>
    <body>
@@ -64,15 +61,15 @@
                </div>
             </div>
             <div style="margin-top: 1rem;">
-               <input type="range" orient="vertical"  class="custom-range" step="25" id="brightness" name="brightness" min="0" max="255" style="width: 100%;">
+               <input type="range" orient="vertical"  class="custom-range" step="25" id="brightness" name="brightness" min="0" max="250" style="width: 100%;">
                <label for="brightness">Яркость</label>
             </div>
             <div style="margin-top: 1rem;">
-               <input type="range" id="speed" class="custom-range" step="25" name="speed" min="0" max="255" style="width: 100%;">
+               <input type="range" id="speed" class="custom-range" step="25" name="speed" min="0" max="250" style="width: 100%;">
                <label for="speed">Скорость</label>
             </div>
             <div style="margin-top: 1rem;">
-               <input type="range" id="scale" class="custom-range" step="25" name="scale" min="0" max="100" style="width: 100%;">
+               <input type="range" id="scale" class="custom-range" step="10" name="scale" min="0" max="100" style="width: 100%;">
                <label for="scale">Масштаб</label>
             </div>
          </div>
@@ -103,42 +100,59 @@
 					  <tbody>
 						<tr>
 						  <th scope="row">Понедельник</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-time-monday" type="time" style="max-width: 120px;" value="08:30"/></td>
 						  <td><input id="js-on-off-monday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>
 						<tr>
 						  <th scope="row">Вторник</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-time-tuesday" type="time" style="max-width: 120px;" value="08:30"/></td>
 						  <td><input id="js-on-off-tuesday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>
 						<tr>
 						  <th scope="row">Среда</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
-						  <td><input id="js-on-off-wensday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
+						  <td><input id="js-time-wednesday" type="time" style="max-width: 120px;" value="08:30"/></td>
+						  <td><input id="js-on-off-wednesday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>
 						<tr>
 						  <th scope="row">Четверг</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-time-thursday" type="time" style="max-width: 120px;" value="08:30"/></td>
 						  <td><input id="js-on-off-thursday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>
 						<tr>
 						  <th scope="row">Пятница</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-time-friday" type="time" style="max-width: 120px;" value="08:30"/></td>
 						  <td><input id="js-on-off-friday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>
 						<tr>
 						  <th scope="row">Суббота</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-time-saturday" type="time" style="max-width: 120px;" value="08:30"/></td>
 						  <td><input id="js-on-off-saturday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>
 						<tr>
 						  <th scope="row">Воскресенье</th>
-						  <td><input class="js-timepicker" id="timepicker" value="09:00"/></td>
+						  <td><input id="js-time-sunday" type="time" style="max-width: 120px;" value="08:30"/></td>
 						  <td><input id="js-on-off-sunday" type="checkbox" checked data-toggle="toggle" data-onstyle="success"></td>
 						</tr>						
 
 					  </tbody>
 					</table>
+					<div style="margin-top: 1rem;">
+						<div class="form-group">
+							<label for="dawnMode">Dawn mode (за сколько минут включается рассвет)</label>
+							<select class="form-control" id="dawnMode">
+							  <option value="0">5</option>
+							  <option value="1">10</option>
+							  <option value="2">15</option>
+							  <option value="3">20</option>
+							  <option value="4">25</option>
+							  <option value="5">30</option>
+							  <option value="6">40</option>
+							  <option value="7">50</option>
+							  <option value="8">60</option>
+							</select>
+						</div>
+					</div>					
+					          
 				</div>
 			</div>
          </div>
@@ -148,7 +162,7 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
       <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
-	      <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
+	      
       <script>
          let scale_time = 0;
          let brightness_time = 0;
@@ -175,13 +189,7 @@
          	}, 100);
          });
          $('#js-on-off-toggle').change(function() {
-         	if ($(this).prop('checked')){
-         		sendCmdJQuery('P_ON');
-         	}
-         	else {
-         		sendCmdJQuery('P_OFF');
-         	}
-         	//setOn($(this).prop('checked'));
+			sendCmdJQuery('P_SWITCH');
          });
          	$(".js-mode-next").on("click", function() {
          	mode=$('#btnGroupDrop').data('mode')+1;
