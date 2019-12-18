@@ -9,17 +9,22 @@
 
 /*
   Версия 1.6:
-  TODO
+  Рализовано управление по http. Android приложение больше не нужно. Флаги USE_WEBUI и USE_UDP.
+
 */
 
 // Ссылка для менеджера плат:
 // http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
-// Для WEMOS выбираем плату LOLIN(WEMOS) D1 R2 & mini		
+// Для WEMOS выбираем плату LOLIN(WEMOS) D1 R2 & mini
 // Для NodeMCU выбираем NodeMCU 1.0 (ESP-12E Module)
 
 // ============= НАСТРОЙКИ =============
-// -------- КНОПКА -------		
+// -------- УПР-Е ПО WEB -------
+#define USE_WEBUI 1
+// -------- УПР-Е ПО UDP -------
+#define USE_UDP 0
+// -------- КНОПКА -------
 #define USE_BUTTON 1    // 1 - использовать кнопку, 0 - нет
 // -------- ВРЕМЯ -------
 #define GMT 3              // смещение (москва 3)
@@ -77,23 +82,28 @@ byte IP_AP[] = {192, 168, 4, 66};   // статический IP точки до
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
-#include <WiFiClient.h>
 #include <EEPROM.h>
 #include <NTPClient.h>
 #include <GyverButton.h>
 #include "fonts.h"
 
-
-// ------------------- ТИПЫ --------------------
+#if (USE_WEBUI == 1)
+#include <ESP8266mDNS.h>
+#include <WiFiClient.h>
 MDNSResponder mdns;
 ESP8266WebServer httpServer(80);
 String webPage = "";
+#endif
+
+// ------------------- ТИПЫ --------------------
+
 CRGB leds[NUM_LEDS];
 WiFiServer server(80);
+#if (USE_UDP == 1)
 WiFiUDP Udp;
+#endif
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_ADDRESS, GMT * 3600, NTP_INTERVAL);
 timerMinim timeTimer(1000);
@@ -105,7 +115,9 @@ const char* autoConnectPass = AC_PASS;
 const char AP_NameChar[] = AP_SSID;
 const char WiFiPassword[] = AP_PASS;
 unsigned int localPort = AP_PORT;
+#if (USE_UDP == 1)
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1]; //buffer to hold incoming packet
+#endif
 String inputBuffer;
 static const byte maxDim = max(WIDTH, HEIGHT);
 struct {
@@ -135,8 +147,8 @@ boolean settChanged = false;
 // Павлин 3D, Зебра 3D, Лес 3D, Океан 3D,
 
 unsigned char matrixValue[8][16];
-String lampIP = "";		
-byte hrs, mins, secs;		
+String lampIP = "";
+byte hrs, mins, secs;
 byte days;
 
 void setup() {
@@ -174,14 +186,9 @@ void setup() {
     Serial.print("WiFi manager");
     WiFiManager wifiManager;
     wifiManager.setDebugOutput(false);
-    
-#if (USE_BUTTON == 1)		
-    if (digitalRead(BTN_PIN)){
-      Serial.print("Going to reset settings");
-      wifiManager.resetSettings();		
-    }
-    else
-    Serial.print("NOT Going to reset settings");
+
+#if (USE_BUTTON == 1)
+    if (digitalRead(BTN_PIN)) wifiManager.resetSettings();
 #endif
 
     wifiManager.autoConnect(autoConnectSSID, autoConnectPass);
@@ -189,24 +196,25 @@ void setup() {
     Serial.println(WiFi.localIP());
     lampIP = WiFi.localIP().toString();
   }
+#if (USE_UDP == 1)
   Serial.printf("UDP server on port %d\n", localPort);
   Udp.begin(localPort);
+#endif
 
+#if (USE_WEBUI == 1)
   if (mdns.begin("esp8266", WiFi.localIP())) {
     Serial.println("MDNS responder started");
   }
-
-
   webPage += "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\"><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css\"><title>Lamp</title></head><body><h1>LAMP</h1><div class=\"container-fluid\"><div class=\"btn-toolbar justify-content-between\" role=\"toolbar\" aria-label=\"Toolbar with button groups\"><div class=\"btn-group mr-1\" role=\"group\" aria-label=\"Button group with nested dropdown\"> <button type=\"button\" class=\"btn btn-lg btn-outline-secondary\"><</button><div class=\"btn-group\" role=\"group\"> <button style=\"width:200px\" id=\"btnGroupDrop\" type=\"button\" class=\"btn btn-lg btn-outline-secondary dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"> Эффекты </button><div class=\"dropdown-menu\" aria-labelledby=\"btnGroupDrop1\"> <a class=\"dropdown-item js-mode-button\" data-mode=\"0\" href=\"#\">Конфетти</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"1\" href=\"#\">Огонь</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"2\" href=\"#\">Радуга(верт)</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"3\" href=\"#\">Радуга(гор)</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"4\" href=\"#\">Смена цвета</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"5\" href=\"#\">Безумие</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"6\" href=\"#\">Облака</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"7\" href=\"#\">Лава</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"8\" href=\"#\">Плазма</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"9\" href=\"#\">Радуга</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"10\" href=\"#\">Павлин</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"11\" href=\"#\">Зебра</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"12\" href=\"#\">Лес</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"13\" href=\"#\">Океан</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"14\" href=\"#\">Цвет</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"15\" href=\"#\">Снег</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"16\" href=\"#\">Матрица</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"17\" href=\"#\">Светлячки</a> <a class=\"dropdown-item js-mode-button\" data-mode=\"18\" href=\"#\">Сервис</a></div></div> <button type=\"button\" class=\"btn btn-lg btn-outline-secondary\">></button></div></div><div style=\"margin-top: 20px;\"> <input type=\"range\" orient=\"vertical\" id=\"brightness\" name=\"brightness\" min=\"1\" max=\"255\" style=\"width: 100%;\"> <label for=\"brightness\">Яркость</label></div><div style=\"margin-top: 20px;\"> <input type=\"range\" id=\"speed\" name=\"speed\" min=\"1\" max=\"255\" style=\"width: 100%;\"> <label for=\"speed\">Скорость</label></div><div style=\"margin-top: 20px;\"> <input type=\"range\" id=\"scale\" name=\"scale\" min=\"1\" max=\"100\" style=\"width: 100%;\"> <label for=\"scale\">Масштаб</label></div><div style=\"margin-top: 40px;\"> <button type=\"button\" class=\"btn btn-success btn-lg\" id=\"js-on-button\">ON</button> <button type=\"button\" class=\"btn btn-danger btn-lg\" id=\"js-off-button\">OFF</button></div><div id=\"output\"></div> <script src=\"http://code.jquery.com/jquery-3.4.1.min.js\" integrity=\"sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=\" crossorigin=\"anonymous\"></script> <script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js\" integrity=\"sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1\" crossorigin=\"anonymous\"></script> <script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script> <script>let scale_time=0;let brightness_time=0;let speed_time=0;$(\"#scale\").on(\"input\",function(){clearTimeout(scale_time);scale=this.value;scale_time=setTimeout(function(){sendCmdJQuery('SCA'+scale);},100);});$(\"#speed\").on(\"input\",function(){clearTimeout(speed_time);speed=this.value;speed_time=setTimeout(function(){sendCmdJQuery('SPD'+speed);},100);});$(\"#brightness\").on(\"input\",function(){clearTimeout(brightness_time);brightness=this.value;brightness_time=setTimeout(function(){sendCmdJQuery('BRI'+brightness);},100);});$(\"#js-on-button\").on(\"click\",function(){sendCmdJQuery('P_ON');setOn(true);});$(\"#js-off-button\").on(\"click\",function(){sendCmdJQuery('P_OFF');setOn(false);});$(\".js-mode-button\").on(\"click\",function(){sendCmdJQuery('EFF'+$(this).attr('data-mode'));setCurrentModeName($(this).text());get_status(false);});function setOn(lampEnabled) {$(\"#js-on-button\").removeClass('active').removeClass('disabled');$(\"#js-off-button\").removeClass('disabled').removeClass('active');if(lampEnabled) {$(\"#js-on-button\").addClass('disabled');$(\"#js-off-button\").addClass('active');} else {$(\"#js-on-button\").addClass('active');$(\"#js-off-button\").addClass('disabled');}} function setCurrentModeName(name) {$('#btnGroupDrop').text(name);} function toJsonContainer(json){setCurrentModeName($(\"a[data-mode=\"+json.status.mode+\"]\").text());$(\"#brightness\").val(json.status.brightness);$(\"#speed\").val(json.status.speed);$(\"#scale\").val(json.status.scale);setOn(json.status.onFlag);} function sendCmdJQuery(command_string){$.get('/specificArgs',{command:command_string});} function get_status(setTimer){$.ajax({type:\"GET\",url:\"/specificArgs\",data:\"command=STATUS\",dataType:\"jsonp\",jsonpCallback:\"toJsonContainer\",timeout:5000,complete:function(response){if(setTimer) setTimeout(function(){get_status(true);},5000);}});} $(function(){get_status(true);});</script> </body></html>";
-  
-  httpServer.on("/", [](){
+
+  httpServer.on("/", []() {
     httpServer.send(200, "text/html", webPage);
   });
 
-  httpServer.on("/specificArgs", handleSpecificArg);   //Associate the handler function to the path
+  httpServer.on("/specificArgs", parseHTTP);   //Associate the handler function to the path
 
   httpServer.begin();
-
+#endif
   // EEPROM
   EEPROM.begin(202);
   delay(50);
@@ -237,6 +245,7 @@ void setup() {
   dawnMode = EEPROM.read(199);
   currentMode = (int8_t)EEPROM.read(200);
 
+#if (USE_UDP == 1)
   // отправляем настройки
   sendCurrent();
   char reply[inputBuffer.length() + 1];
@@ -244,11 +253,12 @@ void setup() {
   Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
   Udp.write(reply);
   Udp.endPacket();
+#endif
   timeClient.begin();
   memset(matrixValue, 0, sizeof(matrixValue));
 
   randomSeed(micros());
-  
+
   // получаем время
   byte count = 0;
   while (count < 5) {
@@ -261,126 +271,20 @@ void setup() {
     }
     count++;
     delay(500);
-  } 
-}
-
-void handleSpecificArg() { 
-  String message = "";
-  inputBuffer = "";
-  if (httpServer.arg("command")== ""){     //Parameter not found
-    message = "Command Argument not found";
-  }else{     //Parameter found
-    message = "Command Argument = ";
-    inputBuffer = httpServer.arg("command");
-    message += inputBuffer;     //Gets the value of the query parameter
   }
-
-    Serial.println("inputBuffer:");
-    Serial.println(inputBuffer);
-     //TODO: CHange to switch
-    if (inputBuffer.startsWith("DEB")) {  //not tested
-      message = "OK " + timeClient.getFormattedTime();
-    } else if (inputBuffer.startsWith("STATUS")) { //{"status":{"mode":0,"brightness":4,"speed":75,"scale":5,"onFlag":1}}
-      message = "toJsonContainer({\"status\":{\"mode\":";
-      message += String(currentMode);
-      message += ",\"brightness\":";
-      message += String(modes[currentMode].brightness);
-      message += ",\"speed\":";
-      message += String(modes[currentMode].speed);
-      message += ",\"scale\":";
-      message += String(modes[currentMode].scale);
-      message += ",\"onFlag\":";
-      message += String(ONflag);
-      message += "}})";      
-      httpServer.send(200, "text/json", message);          //Returns the HTTP response      
-    }  else if (inputBuffer.startsWith("EFF")) {
-      saveEEPROM();
-      currentMode = (byte)inputBuffer.substring(3).toInt();
-      loadingFlag = true;
-      FastLED.clear();
-      delay(1);
-      FastLED.setBrightness(modes[currentMode].brightness);
-    } else if (inputBuffer.startsWith("BRI")) {
-    Serial.println( inputBuffer.substring(3).toInt());      
-      modes[currentMode].brightness = inputBuffer.substring(3).toInt();
-      FastLED.setBrightness(modes[currentMode].brightness);
-      settChanged = true;
-      eepromTimer = millis();
-    } else if (inputBuffer.startsWith("SPD")) {
-    Serial.println( inputBuffer.substring(3).toInt());      
-      modes[currentMode].speed = inputBuffer.substring(3).toInt();
-      loadingFlag = true;
-      settChanged = true;
-      eepromTimer = millis();
-    } else if (inputBuffer.startsWith("SCA")) {
-      modes[currentMode].scale = inputBuffer.substring(3).toInt();
-      loadingFlag = true;
-      settChanged = true;
-      eepromTimer = millis();
-    } else if (inputBuffer.startsWith("P_ON")) {
-      ONflag = true;
-      changePower();
-    } else if (inputBuffer.startsWith("P_OFF")) {
-      ONflag = false;
-      changePower();
-    } else if (inputBuffer.startsWith("P_SWITCH")) {
-      ONflag = !ONflag;
-      changePower();
-    } else if (inputBuffer.startsWith("ALM_SET")) { //not tested
-      byte alarmNum = (char)inputBuffer[7] - '0';
-      //byte alarmNum = (byte)inputBuffer.substring(7).toInt();
-      alarmNum -= 1;
-      Serial.println(inputBuffer);
-      Serial.println(inputBuffer.substring(5));
-      Serial.println(inputBuffer.substring(6));
-      Serial.println(inputBuffer.substring(7));
-      Serial.println(inputBuffer.substring(8));
-      Serial.println(inputBuffer.substring(9));
-      Serial.println(inputBuffer.substring(10));
-      if (inputBuffer.indexOf("ON") != -1) {
-        alarm[alarmNum].state = true;
-        message = "alm #" + String(alarmNum + 1) + " ON";
-      } else if (inputBuffer.indexOf("OFF") != -1) {
-        alarm[alarmNum].state = false;
-        message = "alm #" + String(alarmNum + 1) + " OFF";
-      } else {
-        int almTime = inputBuffer.substring(8).toInt();
-        alarm[alarmNum].time = almTime;
-        byte hour = floor(almTime / 60);
-        byte minute = almTime - hour * 60;
-        message = "alm #" + String(alarmNum + 1) +
-                      " " + String(hour) +
-                      ":" + String(minute);
-      }
-      saveAlarm(alarmNum);
-    } else if (inputBuffer.startsWith("ALM_GET")) {  //TODO: not tested
-        message = "ALMS ";
-        for (byte i = 0; i < 7; i++) {
-          message += String(alarm[i].state);
-          message += " ";
-        }
-        for (byte i = 0; i < 7; i++) {
-          message += String(alarm[i].time);
-          message += " ";
-        }
-        message += (dawnMode + 1);
-    } else if (inputBuffer.startsWith("DAWN")) {  //TODO: not tested
-      dawnMode = inputBuffer.substring(4).toInt() - 1;
-      saveDawnMmode();
-    }
-
-  httpServer.send(200, "text/plain", message);          //Returns the HTTP response
-  
 }
-
 
 void loop() {
+#if (USE_WEBUI == 1)
   httpServer.handleClient();
-  //parseUDP();
+#endif
+#if (USE_UDP == 1)
+  parseUDP();
+#endif
   effectsTick();
   eepromTick();
   timeTick();
-#if (USE_BUTTON == 1)  
+#if (USE_BUTTON == 1)
   buttonTick();
 #endif
   ESP.wdtFeed();   // пнуть собаку

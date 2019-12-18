@@ -38,11 +38,23 @@ void checkDawn() {
   if (thisDay == 0) thisDay = 7;  // воскресенье это 0
   thisDay--;
   thisTime = hrs * 60 + mins;
-
+  Serial.println("thisDay");
+Serial.println(thisDay);
+  Serial.println("alarm[thisDay].state");
+Serial.println(alarm[thisDay].state);
+  Serial.println("thisTime");
+Serial.println(thisTime);
+  Serial.println("alarm[thisDay].time");
+Serial.println(alarm[thisDay].time);
+  Serial.println("dawnOffsets[dawnMode]");
+Serial.println(dawnOffsets[dawnMode]);
+  Serial.println("DAWN_TIMEOUT");
+Serial.println(DAWN_TIMEOUT);
   // проверка рассвета
   if (alarm[thisDay].state &&                                       // день будильника
       thisTime >= (alarm[thisDay].time - dawnOffsets[dawnMode]) &&  // позже начала
       thisTime < (alarm[thisDay].time + DAWN_TIMEOUT) ) {                      // раньше конца + минута
+          Serial.println("WAKE UP MOFOK");
     if (!manualOff) {
       // величина рассвета 0-255
       int dawnPosition = 255 * ((float)(thisTime - (alarm[thisDay].time - dawnOffsets[dawnMode])) / dawnOffsets[dawnMode]);
